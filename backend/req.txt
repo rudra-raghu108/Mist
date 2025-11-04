@@ -1,0 +1,17 @@
+ENVIRONMENT=development
+HOST=0.0.0.0
+PORT=8000
+LOG_LEVEL=INFO
+
+# CSV or JSON arrays both fine
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,application/pdf
+
+# Integrations
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Storage / queues
+REDIS_URL=redis://localhost:6379/0
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/srmguide
