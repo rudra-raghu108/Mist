@@ -151,6 +151,37 @@ npm run dev:full
 
 This single command starts the FastAPI backend from `backend2/main-improved.py` on `http://localhost:8000` and the Vite development server simultaneously, keeping both services in sync during development.
 
+#### Resolving Git conflicts when updating `fix`
+
+If `git pull origin fix` reports "Too many conflicts" or similar merge errors, align your local branch with the remote `fix` baseline:
+
+1. Save any work in progress you want to keep:
+   ```bash
+   git status
+   git add <files-to-keep>
+   git commit -m "save WIP"   # optional, or use `git stash`
+   ```
+2. Reset the local branch to the latest remote snapshot:
+   ```bash
+   git fetch origin
+   git checkout fix
+   git reset --hard origin/fix
+   ```
+   This discards conflicting local edits so you start from the curated version that already wires the frontend to the backend on port 8000.
+3. Re-apply your saved commits (with `git cherry-pick`) or pop your stash and resolve any remaining conflicts interactively:
+   ```bash
+   git stash pop   # only if you used `git stash`
+   ```
+
+When Git marks files as conflicted, open them, keep the sections you need, then finish the merge:
+
+```bash
+git add <resolved-file>
+git merge --continue
+```
+
+After resolving the conflicts, rerun `npm run dev:full` to bring up both servers.
+
 ### 4. Access the Application
 
 Open your browser and go to: `http://localhost:3000`
