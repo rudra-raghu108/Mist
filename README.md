@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ✨ MIST AI - SRM Virtual Assistant
 
 > **Your intelligent guide to SRM University powered by advanced AI**
@@ -424,3 +425,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *If you find this project helpful, please give it a ⭐ star!*
 
+=======
+# Mist
+>>>>>>> af5781f55d2d75323b431d41dc4d68dc99d34588
