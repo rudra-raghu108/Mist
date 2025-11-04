@@ -141,6 +141,15 @@ yarn dev
 
 Your frontend will be running at: `http://localhost:3000`
 
+### 🔁 Run Frontend & Backend Together
+
+```bash
+# From project root
+npm run dev:full
+```
+
+This single command starts the FastAPI backend from `backend2/main-improved.py` on `http://localhost:8000` and the Vite development server simultaneously, keeping both services in sync during development.
+
 ### 4. Access the Application
 
 Open your browser and go to: `http://localhost:3000`

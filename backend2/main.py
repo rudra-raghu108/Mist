@@ -25,6 +25,7 @@ from app.core.database import init_db, close_db
 from app.core.redis import init_redis, close_redis
 from app.core.celery import init_celery
 from app.api.v1.api import api_router
+from app.api.compat import router as compat_router
 from app.core.middleware import (
     RequestLoggingMiddleware,
     ResponseTimeMiddleware,
@@ -110,6 +111,7 @@ def create_application() -> FastAPI:
     
     # Include API routes
     app.include_router(api_router, prefix="/api/v1")
+    app.include_router(compat_router, prefix="/api")
     
     # Health check endpoint
     @app.get("/health", tags=["Health"])

@@ -9,7 +9,7 @@ import { Sidebar } from './Sidebar';
 import { ChatMessage } from './ChatMessage';
 import { Menu, Sparkles, BookOpen, Users, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
 
 interface UserProfile {
   name: string;
@@ -90,7 +90,7 @@ export const MistAI: React.FC = () => {
   const generateResponse = useCallback(async (query: string): Promise<string> => {
     try {
       console.log('Calling backend API for query:', query);
-      console.log('API URL:', 'http://localhost:8000/api/chat');
+      console.log('API URL:', `${API_BASE_URL}/api/chat`);
       
       // Create a consistent user ID - use 'user_shadow' to match existing backend data
       const user_id = 'user_shadow'; // Fixed user ID to match backend
