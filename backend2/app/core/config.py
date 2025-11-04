@@ -3,9 +3,11 @@ Configuration settings for SRM Guide Bot
 """
 
 import os
+from pathlib import Path
 from typing import List, Optional
+
+from pydantic import Field, validator
 from pydantic_settings import BaseSettings
-from pydantic import validator, Field
 
 logger = None
 
@@ -143,6 +145,8 @@ class Settings(BaseSettings):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self._normalize_sqlite_paths()
         
         # Production validation
         if self.ENVIRONMENT == "production":
@@ -150,6 +154,33 @@ class Settings(BaseSettings):
                 raise ValueError("SECRET_KEY must be set in production")
             if not self.OPENAI_API_KEY:
                 raise ValueError("OPENAI_API_KEY must be set in production")
+
+    def _normalize_sqlite_paths(self) -> None:
+        """Ensure SQLite URLs always point to the repository directory."""
+
+        def _resolved_sqlite_url(url: str, *, driver: str = "sqlite") -> str:
+            prefix = f"{driver}:///"
+            if not url.startswith(prefix):
+                return url
+
+            raw_path = url[len(prefix) :]
+            db_path = Path(raw_path)
+            if db_path.is_absolute():
+                return f"{driver}:///{db_path}"
+
+            project_root = Path(__file__).resolve().parents[2]
+            resolved = (project_root / db_path).resolve()
+            return f"{driver}:///{resolved}"
+
+        normalized_sync = _resolved_sqlite_url(self.SQL_DATABASE_URL, driver="sqlite")
+        object.__setattr__(self, "SQL_DATABASE_URL", normalized_sync)
+
+        if self.SQL_DATABASE_URL_ASYNC:
+            normalized_async = _resolved_sqlite_url(self.SQL_DATABASE_URL_ASYNC, driver="sqlite+aiosqlite")
+            object.__setattr__(self, "SQL_DATABASE_URL_ASYNC", normalized_async)
+        elif normalized_sync.startswith("sqlite:///"):
+            async_url = normalized_sync.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
+            object.__setattr__(self, "SQL_DATABASE_URL_ASYNC", async_url)
 
 
 # Create settings instance

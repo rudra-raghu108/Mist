@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ✨ MIST AI - SRM Virtual Assistant
 
 > **Your intelligent guide to SRM University powered by advanced AI**
@@ -140,6 +139,17 @@ yarn dev
 ```
 
 Your frontend will be running at: `http://localhost:3000`
+
+### 🔁 Run Frontend & Backend Together
+
+```bash
+# From the project root (the folder that contains package.json)
+npm run dev:full
+```
+
+> **Windows tip:** If you see `npm ERR! enoent Could not read package.json`, make sure you `cd` into the `Mist` directory before running the command. Running it from any parent folder (for example `D:\Code\Demo`) will trigger that error because Node.js cannot find the project's `package.json` from outside the repository root.
+
+This single command starts the FastAPI backend from `backend2/main-improved.py` on `http://localhost:8000` and the Vite development server simultaneously, keeping both services in sync during development.
 
 ### 4. Access the Application
 
