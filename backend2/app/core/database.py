@@ -9,6 +9,7 @@ from typing import AsyncIterator, Generator, Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
@@ -344,19 +345,38 @@ async def get_async_mongodb_database():
 
 
 async def init_mongodb() -> None:
-    """Initialize MongoDB by validating the connection and indexes."""
+    """Initialize MongoDB if a server is available."""
+
+    global sync_client, mongodb
 
     try:
         client = get_mongodb_client()
         client.admin.command("ping")
-        logger.info("✅ MongoDB connected successfully to: %s", settings.MONGO_DB_NAME)
-
-        await create_indexes()
-        logger.info("✅ MongoDB indexes created successfully")
-
+    except PyMongoError as exc:  # pragma: no cover - startup logging
+        logger.warning(
+            "⚠️ MongoDB not reachable (%s). Continuing without MongoDB features.",
+            exc,
+        )
+        if sync_client is not None:
+            sync_client.close()
+            sync_client = None
+        mongodb = None
+        return
     except Exception as exc:  # pragma: no cover - startup logging
-        logger.error("❌ MongoDB initialization failed: %s", exc)
-        raise
+        logger.warning(
+            "⚠️ Unexpected MongoDB issue (%s). Continuing without MongoDB features.",
+            exc,
+        )
+        if sync_client is not None:
+            sync_client.close()
+            sync_client = None
+        mongodb = None
+        return
+
+    logger.info("✅ MongoDB connected successfully to: %s", settings.MONGO_DB_NAME)
+
+    await create_indexes()
+    logger.info("✅ MongoDB indexes created successfully")
 
 
 async def create_indexes() -> None:
@@ -364,7 +384,14 @@ async def create_indexes() -> None:
 
     try:
         db = get_mongodb_database()
+    except Exception as exc:  # pragma: no cover - operational logging
+        logger.warning(
+            "⚠️ Skipping MongoDB index creation because the database is unavailable: %s",
+            exc,
+        )
+        return
 
+    try:
         db.knowledge_database.create_index([("content", "text")])
         db.chat_history.create_index([("user_id", 1), ("created_at", -1)])
         db.user_sessions.create_index([("user_id", 1)])
@@ -372,9 +399,13 @@ async def create_indexes() -> None:
 
         logger.info("✅ MongoDB indexes ensured")
 
+    except PyMongoError as exc:  # pragma: no cover - operational logging
+        logger.warning(
+            "⚠️ Failed to create MongoDB indexes due to connectivity issues: %s",
+            exc,
+        )
     except Exception as exc:  # pragma: no cover - operational logging
-        logger.error("❌ Failed to create MongoDB indexes: %s", exc)
-        raise
+        logger.warning("⚠️ Failed to create MongoDB indexes: %s", exc)
 
 
 async def init_db() -> None:
